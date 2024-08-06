@@ -61,7 +61,8 @@ labelChange.grid(
     row=drinksRowsCount + 3, column=0)
 
 # Finish button
-Button(root, text="Finish").grid(row=drinksRowsCount + 4, column=0)
+Button(root, text="Finish", command=lambda: reset()).grid(
+    row=drinksRowsCount + 4, column=0)
 
 
 def addDrink(price):
@@ -88,6 +89,16 @@ def enterSum(value):
         global enteredSum
         enteredSum += value
         updateLabels()
+
+
+def reset():
+    global sum, enteredSum, count, maxCount, change
+    sum = 0
+    enteredSum = 0
+    count = 0
+    maxCount = 1
+    change = 0
+    updateLabels()
 
 
 # all widgets will be here
