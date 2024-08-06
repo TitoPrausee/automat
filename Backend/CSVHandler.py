@@ -21,4 +21,4 @@ def DeleteCSVs(filenames):
                 os.remove(fullpath)
 
 DeleteCSVs(['prices.csv', 'transactions.csv', 'stock.csv'])
-CreateIfMissing([('prices.csv', ['item', 'price']), ('transactions.csv', ['item']), ('stock.csv', ['item', 'stock'])])
+CreateIfMissing([('prices.csv', ['item', 'price']), ('transactions.csv', ['item']), ('stock.csv', ['item', 'quantity'])])
