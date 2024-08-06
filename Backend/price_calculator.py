@@ -39,3 +39,5 @@ if __name__ == '__main__':
     load_prices_from_csv()
     total_price = calculate_total_price('cola', 2)
     display_price(total_price)
+
+    # ---
