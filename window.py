@@ -9,6 +9,10 @@ root.title("Automat")
 # Set geometry (widthxheight)
 root.geometry('700x1000')
 
+Label(root, text="Eingabe").grid(row=0)
+entryInput = Entry(root)
+entryInput.grid(row=0, column=1)
+
 # all widgets will be here
 # Execute Tkinter
 root.mainloop()
