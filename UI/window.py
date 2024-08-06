@@ -12,6 +12,8 @@ drinks = {
     "Coffee": 2.5
 }
 
+maxCount = 1
+count = 0
 sum = 0
 enteredSum = 0
 sumToEnter = 0
@@ -63,9 +65,11 @@ Button(root, text="Finish").grid(row=drinksRowsCount + 4, column=0)
 
 
 def addDrink(price):
-    global sum
-    sum += price
-    updateLabels()
+    global sum, maxCount, count
+    if (count < maxCount):
+        sum += price
+        count += 1
+        updateLabels()
 
 
 def updateLabels():
