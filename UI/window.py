@@ -39,7 +39,7 @@ for idx, (drink, price) in enumerate(drinks.items()):
 listOfPossibleBanknotes = ', '.join(str(x) for x in supportedBanknotes)
 
 # Input field
-Label(root, text=f"Geben Sie die Banknote ein. Mögliche Banknoten: {listOfPossibleBanknotes}").grid(
+Label(root, text=f"Geben Sie das Geld ein. Mögliche Scheine: {listOfPossibleBanknotes}").grid(
     row=drinksRowsCount + 0, column=0)
 entry = Entry(root)
 entry.grid(row=drinksRowsCount + 0, column=1)
