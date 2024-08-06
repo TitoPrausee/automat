@@ -2,6 +2,8 @@
 from tkinter import *
 from math import ceil, floor
 
+from Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
+
 drinks = {
     "Cola": 2,
     "Water": 1,
@@ -28,23 +30,35 @@ root.geometry('700x1000')
 drinksCountInRow = 3
 drinksRowsCount = ceil(len(drinks) / drinksCountInRow)
 for idx, (drink, price) in enumerate(drinks.items()):
-    Button(root, text=f"{drink} - ${price}", command=lambda price=price: addDrink(
-        price)).grid(row=floor(idx/drinksCountInRow), column=ceil(idx % drinksCountInRow))
+    buttonText = f"{drink} - {price}€"
+    buttonRow = floor(idx/drinksCountInRow)
+    buttonColumn = ceil(idx % drinksCountInRow)
+    Button(root, text=buttonText, command=lambda price=price: addDrink(
+        price)).grid(row=buttonRow, column=buttonColumn)
 
-Label(root, text="Eingabe").grid(row=drinksRowsCount + 0, column=0)
+listOfPossibleBanknotes = ', '.join(str(x) for x in supportedBanknotes)
+
+# Input field
+Label(root, text=f"Geben Sie die Banknote ein. Mögliche Banknoten: {listOfPossibleBanknotes}").grid(
+    row=drinksRowsCount + 0, column=0)
 entry = Entry(root)
 entry.grid(row=drinksRowsCount + 0, column=1)
 Button(root, text="Eingeben", command=lambda: enterSum(
     int(entry.get()))).grid(row=drinksRowsCount + 0, column=2)
 
-Label(root, text="Eingegeben: {}".format(enteredSum)).grid(
+# Info labels
+labelEnteredSum = Label(root, text="Eingegeben: {}".format(enteredSum))
+labelEnteredSum.grid(
     row=drinksRowsCount + 1, column=0)
-Label(root, text="Noch einzugeben: {}".format(
-    sumToEnter)).grid(row=drinksRowsCount + 2, column=0)
-
-Label(root, text="Ausgabe: {}".format(change)).grid(
+labelSumToEnter = Label(root, text="Noch einzugeben: {}".format(
+    sumToEnter))
+labelSumToEnter.grid(row=drinksRowsCount + 2, column=0)
+labelChange = Label(root, text=f"Ausgabe: {
+                    formatBanknotes(sumToBanknotes(change))}")
+labelChange.grid(
     row=drinksRowsCount + 3, column=0)
 
+# Finish button
 Button(root, text="Finish").grid(row=drinksRowsCount + 4, column=0)
 
 
@@ -59,18 +73,17 @@ def updateLabels():
     sumToEnter = sum - enteredSum if sum - enteredSum >= 0 else 0
     change = enteredSum - sum if enteredSum - sum >= 0 else 0
 
-    Label(root, text="Eingegeben: {}".format(
-        enteredSum)).grid(row=drinksRowsCount + 1, column=0)
-    Label(root, text="Noch einzugeben: {}".format(
-        sumToEnter)).grid(row=drinksRowsCount + 2, column=0)
-    Label(root, text="Ausgabe: {}".format(change)).grid(
-        row=drinksRowsCount + 3, column=0)
+    labelEnteredSum.config(text=f"Eingegeben: {enteredSum}")
+    labelSumToEnter.config(text=f"Noch einzugeben: {sumToEnter}")
+    labelChange.config(
+        text=f"Ausgabe: {formatBanknotes(sumToBanknotes(change))}")
 
 
 def enterSum(value):
-    global enteredSum
-    enteredSum += value
-    updateLabels()
+    if (int(value) in supportedBanknotes):
+        global enteredSum
+        enteredSum += value
+        updateLabels()
 
 
 # all widgets will be here
