@@ -9,29 +9,45 @@ import csv
 import os
 from DataAccessors.Price import Price
 
-# Constants for file paths
+# Constants
 CSV_DIR = 'CSV'  # Directory where CSV files are stored
 PRICES_FILE = 'prices.csv'  # Filename for the prices data
 
-# Price data storage
-prices_data = {}  # Dictionary to store prices loaded from the CSV file
+# Global price data storage
+_prices_data = None  # Lazy-loaded dictionary to store prices from CSV
 
-
-def load_prices_from_csv():
+def _load_prices_from_csv():
     """
-    Load prices from the CSV file into the prices_data dictionary.
+    Load prices from the CSV file into the _prices_data dictionary.
 
-    This function reads the CSV file containing item prices and populates 
-    the global prices_data dictionary with item names as keys and their 
-    respective prices as values.
+    Reads the CSV file containing item prices and populates the global 
+    _prices_data dictionary with item names as keys and their respective 
+    prices as values.
     """
-    csv_file_path = os.path.join(CSV_DIR, PRICES_FILE)
-    with open(csv_file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            # Store each item and its price in the dictionary
-            prices_data[row['name']] = float(row['price'])
+    global _prices_data
+    if _prices_data is None:
+        _prices_data = {}
+        csv_file_path = os.path.join(CSV_DIR, PRICES_FILE)
+        try:
+            with open(csv_file_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    _prices_data[row['name']] = float(row['price'])
+        except (FileNotFoundError, KeyError) as e:
+            print(f"Error loading prices from CSV: {e}")
+            _prices_data = {}
 
+def _merge_prices_with_additional_data():
+    """
+    Merge the CSV prices data with additional data from the Price module.
+
+    Combines the prices from the CSV file with those from the Price module,
+    with CSV data taking precedence if there are conflicts.
+    """
+    _load_prices_from_csv()  # Ensure CSV data is loaded
+    additional_prices_data = Price.readAllPrices()
+    all_prices_data = {**additional_prices_data, **_prices_data}
+    return all_prices_data
 
 def calculate_total_price(item_name, quantity):
     """
@@ -41,26 +57,13 @@ def calculate_total_price(item_name, quantity):
     :param quantity: Number of units of the item.
     :return: Total price for the specified quantity of the item.
     """
-    # You can combine both sources or choose one method to retrieve prices.
-    # Here is an example of combining both:
-
-    # Load prices from the CSV if not already loaded
-    if not prices_data:
-        load_prices_from_csv()
-
-    # Use the Price module's method to read all prices, if applicable
-    additional_prices_data = Price.readAllPrices()
-
-    # Merge the two dictionaries, with CSV data taking precedence
-    all_prices_data = {**additional_prices_data, **prices_data}
+    all_prices_data = _merge_prices_with_additional_data()
 
     if item_name in all_prices_data:
-        # Calculate total by multiplying the item price by the quantity
         return all_prices_data[item_name] * quantity
     else:
-        # If item is not found, return 0.0 as the price
+        print(f"Item '{item_name}' not found. Returning price as 0.0 €.")
         return 0.0
-
 
 def display_price(total_price):
     """
@@ -70,7 +73,8 @@ def display_price(total_price):
     """
     print(f"Total Price: {total_price:.2f} €")
 
-
 if __name__ == '__main__':
-    total_price = calculate_total_price('cola', 2)
+    item_name = 'cola'
+    quantity = 2
+    total_price = calculate_total_price(item_name, quantity)
     display_price(total_price)
