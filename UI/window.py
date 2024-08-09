@@ -2,8 +2,13 @@
 from tkinter import *
 from math import ceil, floor
 
-from Backend.Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
+# Füge den Python-Pfad hinzu, damit das Backend-Modul gefunden wird
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Verwende den relativen Import, um das Backend-Modul zu importieren
+from Backend.Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
 
 drinks = {
     "Cola": 2,
