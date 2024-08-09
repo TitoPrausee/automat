@@ -55,8 +55,7 @@ labelEnteredSum.grid(
 labelSumToEnter = Label(root, text="Noch einzugeben: {}".format(
     sumToEnter))
 labelSumToEnter.grid(row=drinksRowsCount + 2, column=0)
-labelChange = Label(root, text=f"Ausgabe: {
-                    formatBanknotes(sumToBanknotes(change))}")
+labelChange = Label(root, text=f"Ausgabe: {formatBanknotes(sumToBanknotes(change))}") #Tito :)
 labelChange.grid(
     row=drinksRowsCount + 3, column=0)
 
