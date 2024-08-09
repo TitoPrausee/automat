@@ -2,7 +2,8 @@
 from tkinter import *
 from math import ceil, floor
 
-from Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
+from Backend.Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
+
 
 drinks = {
     "Cola": 2,
