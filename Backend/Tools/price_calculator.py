@@ -7,6 +7,7 @@ providing functions to calculate and display the total price of items.
 
 import csv
 import os
+from DataAccessors.Price import Price
 
 # Constants for file paths
 CSV_DIR = 'CSV'  # Directory where CSV files are stored
@@ -40,9 +41,22 @@ def calculate_total_price(item_name, quantity):
     :param quantity: Number of units of the item.
     :return: Total price for the specified quantity of the item.
     """
-    if item_name in prices_data:
+    # You can combine both sources or choose one method to retrieve prices.
+    # Here is an example of combining both:
+
+    # Load prices from the CSV if not already loaded
+    if not prices_data:
+        load_prices_from_csv()
+
+    # Use the Price module's method to read all prices, if applicable
+    additional_prices_data = Price.readAllPrices()
+
+    # Merge the two dictionaries, with CSV data taking precedence
+    all_prices_data = {**additional_prices_data, **prices_data}
+
+    if item_name in all_prices_data:
         # Calculate total by multiplying the item price by the quantity
-        return prices_data[item_name] * quantity
+        return all_prices_data[item_name] * quantity
     else:
         # If item is not found, return 0.0 as the price
         return 0.0
@@ -55,3 +69,8 @@ def display_price(total_price):
     :param total_price: The total price to be displayed.
     """
     print(f"Total Price: {total_price:.2f} €")
+
+
+if __name__ == '__main__':
+    total_price = calculate_total_price('cola', 2)
+    display_price(total_price)
