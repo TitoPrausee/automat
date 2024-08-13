@@ -8,6 +8,7 @@ removing, importing, and exporting products using CSV files.
 import csv  # Module for working with CSV files
 import os   # Module for working with operating system functions
 
+# 1. Klasse zur Darstellung eines Produkts
 class Produkt:
     """
     Represents a single product with name, price, and quantity.
@@ -22,6 +23,7 @@ class Produkt:
         self.preis = preis  # Price of the product
         self.menge = menge  # Quantity of the product
 
+# 2. Klasse zur Verwaltung des Bestands
 class Bestand:
     """
     Manages a collection of products in stock.
@@ -37,6 +39,7 @@ class Bestand:
     def __init__(self):
         self.produkte = {}  # Dictionary to store products by name
 
+    # 2.1 Produkt zum Bestand hinzufügen
     def add_produkt(self, produkt):
         """
         Add a product to the stock. If the product already exists, 
@@ -51,6 +54,7 @@ class Bestand:
             # If the product does not exist, add it to the stock
             self.produkte[produkt.name] = produkt
 
+    # 2.2 Produkt aus dem Bestand entfernen
     def remove_produkt(self, name, menge):
         """
         Remove a specific quantity of a product from the stock.
@@ -67,6 +71,7 @@ class Bestand:
         else:
             print("Produkt nicht gefunden.")
 
+    # 2.3 Produkt anhand des Namens abrufen
     def get_produkt(self, name):
         """
         Retrieve a product by its name.
@@ -76,6 +81,7 @@ class Bestand:
         """
         return self.produkte.get(name)
 
+    # 2.4 String-Darstellung des Bestands
     def __str__(self):
         """
         Return a readable representation of the current stock.
@@ -87,6 +93,7 @@ class Bestand:
             output += f"{produkt.name}: {produkt.menge} Stück\n"
         return output
 
+    # 2.5 Produkte aus einer CSV-Datei importieren
     def import_from_csv(self, filename):
         """
         Import products from a CSV file into the stock.
@@ -102,6 +109,7 @@ class Bestand:
                 produkt = Produkt(name, float(preis), int(menge))
                 self.add_produkt(produkt)
 
+    # 2.6 Aktuellen Bestand in eine CSV-Datei exportieren
     def export_to_csv(self, filename):
         """
         Export the current stock to a CSV file.
