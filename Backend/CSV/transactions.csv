@@ -1,1 +1,1 @@
-Id,item
+transaction_id,item,quantity,price,total,timestamp

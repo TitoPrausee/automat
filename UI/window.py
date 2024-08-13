@@ -1,125 +1,67 @@
-"""
-Vending Machine GUI
-====================
-This script creates a simple GUI for a vending machine using Tkinter.
-It allows the selection of drinks, entering of money, and displays the
-change to be given.
-"""
+# UI/window.py
 
-import sys
-import os
-from tkinter import *
-from math import ceil, floor
+import tkinter as tk
+from tkinter import Button, Entry, Label, DISABLED
+from math import ceil
 
-# Füge den Python-Pfad hinzu, um das Backend-Modul zu finden
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+def create_window(root, price_calculator, stock_manager):
+    enteredSum = 0
+    sumToEnter = 0
+    change = 0
 
-# Importiere das Backend-Modul für Banknotenoperationen
-from Backend.Tools.banknotes import supportedBanknotes, sumToBanknotes, formatBanknotes
+    drinks = price_calculator.prices_data
 
-# Global variables for managing the vending machine state
-drinks = {
-    "Cola": 2,
-    "Water": 1,
-    "Juice": 3,
-    "Tea": 1.5,
-    "Coffee": 2.5
-}
+    drinksCountInRow = 3
+    drinksRowsCount = ceil(len(drinks) / drinksCountInRow)
 
-maxCount = 1  # Maximum number of drinks that can be selected at once
-count = 0  # Counter for selected drinks
-sum = 0  # Total sum of selected drinks
-enteredSum = 0  # Sum of money entered by the user
-sumToEnter = 0  # Amount of money still needed to complete the transaction
-change = 0  # Amount of change to be returned
+    for idx, (drink, price) in enumerate(drinks.items()):
+        buttonRow = idx // drinksCountInRow
+        buttonColumn = idx % drinksCountInRow
+        buttonText = f"{drink} - {price}€"
 
-# Create the main window
-root = Tk()
-root.title("Automat")  # Set window title
-root.geometry('700x1000')  # Set window size (width x height)
+        if stock_manager.is_in_stock(drink, 1):
+            button = Button(root, text=buttonText, command=lambda drink=drink, price=price: add_drink(drink, price, stock_manager, sumToEnter))
+        else:
+            button = Button(root, text=f"{drink} - AUSVERKAUFT", state=DISABLED)
 
-# Layout configuration
-drinksCountInRow = 3  # Number of drink buttons per row
-drinksRowsCount = ceil(len(drinks) / drinksCountInRow)  # Number of rows needed for drink buttons
+        button.grid(row=buttonRow, column=buttonColumn)
 
-# Add drink selection buttons
-for idx, (drink, price) in enumerate(drinks.items()):
-    buttonText = f"{drink} - {price}€"
-    buttonRow = floor(idx / drinksCountInRow)
-    buttonColumn = idx % drinksCountInRow
-    Button(root, text=buttonText, command=lambda price=price: addDrink(price)).grid(row=buttonRow, column=buttonColumn)
+    entry = Entry(root)
+    entry.grid(row=drinksRowsCount + 0, column=1)
+    Button(root, text="Eingeben", command=lambda: enter_sum(entry, sumToEnter)).grid(row=drinksRowsCount + 0, column=2)
 
-# List of supported banknotes
-listOfPossibleBanknotes = ', '.join(str(x) for x in supportedBanknotes)
+    labelEnteredSum = Label(root, text="Eingegeben: 0")
+    labelEnteredSum.grid(row=drinksRowsCount + 1, column=0)
+    labelSumToEnter = Label(root, text="Noch einzugeben: 0")
+    labelSumToEnter.grid(row=drinksRowsCount + 2, column=0)
+    labelChange = Label(root, text="Ausgabe: 0")
+    labelChange.grid(row=drinksRowsCount + 3, column=0)
 
-# Input field for entering money
-Label(root, text=f"Geben Sie das Geld ein. Mögliche Scheine: {listOfPossibleBanknotes}").grid(row=drinksRowsCount + 0, column=0)
-entry = Entry(root)
-entry.grid(row=drinksRowsCount + 0, column=1)
-Button(root, text="Eingeben", command=lambda: enterSum(int(entry.get()))).grid(row=drinksRowsCount + 0, column=2)
+    Button(root, text="Finish", command=reset).grid(row=drinksRowsCount + 4, column=0)
 
-# Labels to display current state
-labelEnteredSum = Label(root, text="Eingegeben: {}".format(enteredSum))
-labelEnteredSum.grid(row=drinksRowsCount + 1, column=0)
-labelSumToEnter = Label(root, text="Noch einzugeben: {}".format(sumToEnter))
-labelSumToEnter.grid(row=drinksRowsCount + 2, column=0)
-labelChange = Label(root, text=f"Ausgabe: {formatBanknotes(sumToBanknotes(change))}")
-labelChange.grid(row=drinksRowsCount + 3, column=0)
+def add_drink(drink, price, stock_manager, sumToEnter):
+    sumToEnter += price
+    stock_manager.update_stock(drink, 1)
+    update_labels()
 
-# Finish button to reset the machine
-Button(root, text="Finish", command=lambda: reset()).grid(row=drinksRowsCount + 4, column=0)
-
-
-def addDrink(price):
-    """
-    Add a drink's price to the total if the maximum count is not reached.
-
-    :param price: The price of the selected drink.
-    """
-    global sum, maxCount, count
-    if count < maxCount:
-        sum += price  # Add the drink price to the total sum
-        count += 1  # Increase the count of selected drinks
-        updateLabels()  # Update the labels to reflect the new state
-
-
-def updateLabels():
-    """
-    Update the GUI labels to reflect the current transaction state.
-    """
-    global sum, enteredSum, sumToEnter, change
-    sumToEnter = max(sum - enteredSum, 0)  # Calculate the remaining amount to enter
-    change = max(enteredSum - sum, 0)  # Calculate the change to be returned
-
+def update_labels():
+    global enteredSum, sumToEnter, change
+    global labelEnteredSum, labelSumToEnter, labelChange
+    
+    change = enteredSum - sumToEnter if enteredSum >= sumToEnter else 0
     labelEnteredSum.config(text=f"Eingegeben: {enteredSum}")
-    labelSumToEnter.config(text=f"Noch einzugeben: {sumToEnter}")
-    labelChange.config(text=f"Ausgabe: {formatBanknotes(sumToBanknotes(change))}")
+    labelSumToEnter.config(text=f"Noch einzugeben: {max(sumToEnter - enteredSum, 0)}")
+    labelChange.config(text=f"Ausgabe: {change}")
 
 
-def enterSum(value):
-    """
-    Handle money entry, updating the total entered sum.
 
-    :param value: The monetary value entered by the user.
-    """
-    if value in supportedBanknotes:
-        global enteredSum
-        enteredSum += value  # Add the entered value to the total entered sum
-        updateLabels()  # Update the labels to reflect the new state
-
+def enter_sum(entry, sumToEnter):
+    value = int(entry.get())
+    enteredSum += value
+    update_labels()
 
 def reset():
-    """
-    Reset the vending machine to its initial state.
-    """
-    global sum, enteredSum, count, maxCount, change
-    sum = 0
+    sumToEnter = 0
     enteredSum = 0
-    count = 0
-    maxCount = 1
     change = 0
-    updateLabels()  # Update the labels to reflect the reset state
-
-
-# Start the Tkinter main loop
-root.mainloop()
+    update_labels()
