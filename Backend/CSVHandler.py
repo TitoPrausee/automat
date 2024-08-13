@@ -1,24 +1,29 @@
 import csv
-import os
-import os.path
 
+class CSVHandler:
+    def __init__(self):
+        pass
 
-def CreateIfMissing(filedescriptions):
-        dirname = os.path.dirname(__file__)
-        for file in filedescriptions:
-                fullpath = os.path.join(dirname, 'CSV/' + file[0])
-                if os.path.isfile(fullpath) is False:
-                        with open(fullpath, 'w', newline='') as csvFile:
-                                fieldnames = file[1]
+    def read_csv(self, file_path):
+        data = {}
+        with open(file_path, mode='r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if 'price' in row:
+                    data[row['name']] = float(row['price'])
+                elif 'quantity' in row:
+                    data[row['name']] = int(row['quantity'])
+        return data
 
-                                writer = csv.DictWriter(csvFile, fieldnames)
-                                writer.writeheader()
-
-def DeleteCSVs(filenames):
-        dirname = os.path.dirname(__file__)
-        for file in filenames:
-                fullpath = os.path.join(dirname, 'CSV/' + file)
-                os.remove(fullpath)
-
-DeleteCSVs(['prices.csv', 'transactions.csv', 'stock.csv'])
-CreateIfMissing([('prices.csv', ['item', 'price']), ('transactions.csv', ['item']), ('stock.csv', ['item', 'quantity'])])
+    def write_csv(self, file_path, data):
+        with open(file_path, mode='w', newline='') as file:
+            if 'price' in data:
+                writer = csv.DictWriter(file, fieldnames=['name', 'price'])
+                writer.writeheader()
+                for name, price in data.items():
+                    writer.writerow({'name': name, 'price': price})
+            else:
+                writer = csv.DictWriter(file, fieldnames=['name', 'quantity'])
+                writer.writeheader()
+                for name, quantity in data.items():
+                    writer.writerow({'name': name, 'quantity': quantity})
