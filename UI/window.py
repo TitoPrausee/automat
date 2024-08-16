@@ -1,10 +1,14 @@
 # UI/window.py
 
 import tkinter as tk
-from tkinter import Button, Label, DISABLED
+from tkinter import Button, Label, DISABLED, simpledialog, messagebox
 from math import ceil
 import csv
+import os
+from UI.admin_panel import AdminPanel
 from datetime import datetime
+from Backend.DataAccessors.Stock import Stock
+from Backend.CSVHandler import CSVHandler
 
 # Globale Variablen initialisieren
 global enteredSum, sumToEnter, change, transaction_id
@@ -12,7 +16,7 @@ global labelEnteredSum, labelSumToEnter, labelChange
 enteredSum = 0
 sumToEnter = 0
 change = 0
-transaction_id = 1  # Starten bei 1 für die erste Transaktion
+transaction_id = 1  
 
 def create_window(root, price_calculator, stock_manager):
     global enteredSum, sumToEnter, change, transaction_id
@@ -54,6 +58,9 @@ def create_window(root, price_calculator, stock_manager):
 
     Button(root, text="Finish", command=reset).grid(row=drinksRowsCount + 6, column=0)
 
+    # Auffüllen-Button für Admin-Zugang
+    Button(root, text="Auffüllen", command=open_admin_panel).grid(row=drinksRowsCount + 7, column=0)
+
 def add_drink(drink, price, stock_manager):
     global sumToEnter
     sumToEnter += price
@@ -88,8 +95,26 @@ def log_transaction(item, quantity, price, total):
     transaction_data = [transaction_id, item, quantity, price, total, timestamp]
     
     # Transaktionsdaten in die CSV-Datei schreiben
-    with open('Backend/CSV/transactions.csv', mode='a', newline='') as file:
+    with open(os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'transactions.csv'), mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(transaction_data)
 
-    transaction_id += 1  # Transaktions-ID für die nächste Transaktion erhöhen
+    transaction_id += 1  
+
+def open_admin_panel():
+    # Passwortabfrage
+    password = simpledialog.askstring("Passwort eingeben", "Bitte das Admin-Passwort eingeben:", show='*')
+    if password == "tito": 
+        # Admin-Panel öffnen
+        admin_root = tk.Toplevel()
+        admin_root.title("Admin Panel")
+        csv_handler = CSVHandler()  # CSVHandler erstellen
+        
+        # Absoluter Pfad zur stock.csv
+        file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
+        
+        stock_manager = Stock(csv_handler, file_path)
+        AdminPanel(admin_root, stock_manager)
+        admin_root.mainloop()
+    else:
+        messagebox.showerror("Fehler", "Falsches Passwort!")
