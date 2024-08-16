@@ -24,7 +24,7 @@ class CSVHandler:
     # 1.3 Funktion zum Schreiben von Daten in CSV-Dateien
     def write_csv(self, file_path, data):
         with open(file_path, mode='w', newline='') as file:
-            if 'price' in data:
+            if any('price' in row for row in data.values()):
                 # CSV-Datei für Preise erstellen
                 writer = csv.DictWriter(file, fieldnames=['name', 'price'])
                 writer.writeheader()
