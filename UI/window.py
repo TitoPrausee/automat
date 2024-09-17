@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import Button, Label, DISABLED, simpledialog, messagebox, Frame
-from math import ceil
+from math import ceil, floor
 import csv
 import os
 from UI.admin_panel import AdminPanel
@@ -13,6 +13,7 @@ from Backend.CSVHandler import CSVHandler
 # Globale Variablen initialisieren
 global enteredSum, sumToEnter, change, transaction_id, guthaben
 global labelEnteredSum, labelSumToEnter, labelChange, guthabenLabel
+global drinksFrame
 guthaben = 0
 enteredSum = 0
 sumToEnter = 0
@@ -21,11 +22,11 @@ transaction_id = 1
 
 def create_UI(root, price_calculator, stock_manager):
     global guthabenLabel
-    
+    global drinksFrame
+
     root.grid_columnconfigure(0, weight=1)  # Column 0
     root.grid_columnconfigure(1, weight=1)  # Column 1 (centered labels will be here)
     root.grid_columnconfigure(2, weight=1)  # Column 2
-
     
     Label(root, text="Getränkeautomat", font=("Arial", 22)).grid(row=0, column=1, sticky="NSEW", padx=10)
 
@@ -54,10 +55,22 @@ def create_UI(root, price_calculator, stock_manager):
     drinksFrame.grid_columnconfigure(0, weight=1)
     drinksFrame.grid_columnconfigure(1, weight=1)
     drinksFrame.grid_columnconfigure(2, weight=1)
+    #drinks should be added here
+    gernerate_drink_buttons(["Cola", "Fanta", "Sprite", "Wasser"])
 
     Button(root, text="Ausgabe", state=DISABLED).grid(row=4, column=1, sticky="ns", pady=10)
-    Button(root, text="Abbruch", command=reset_money).grid(row=4, column=0)
-    Button(root, text="Wartung").grid(row=4, column=3)
+    # Button(root, text="Abbruch", command=reset_money).grid(row=4, column=0)
+    # Button(root, text="Wartung").grid(row=4, column=3)
+
+def gernerate_drink_buttons(drinks):
+    drinksperrow = 3
+    global drinksFrame
+    for i, drink in enumerate(drinks):
+        currentColumn = i % drinksperrow
+        currentRow = floor(i / drinksperrow)
+        if currentColumn < 0:
+            currentColumn = 0
+        Button(drinksFrame, text=drink, highlightbackground="white", width=7).grid(column=currentColumn, row=currentRow, sticky="ew", padx= 2)
 
 def enter_money(value):
     global guthabenLabel, guthaben
@@ -68,6 +81,10 @@ def reset_money():
     global guthabenLabel, guthaben
     guthaben = 0
     guthabenLabel.config(text="Guhaben: 0")
+
+#---------------------------------------------
+#ignore everything below
+#---------------------------------------------
 
 def create_window(root, price_calculator, stock_manager):
     global enteredSum, sumToEnter, change, transaction_id
