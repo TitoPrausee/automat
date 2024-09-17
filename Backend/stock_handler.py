@@ -1,27 +1,18 @@
-"""
-Stock Management
-=================
-This module handles the management of product stock, including adding,
-removing, importing, and exporting products using CSV files.
-"""
+import csv
+import os
 
-import csv  # Module for working with CSV files
-import os   # Module for working with operating system functions
-
-# 1. Klasse zur Darstellung eines Produkts
+# 1. Klasse zur Darstellung eines Produkts (ohne Preis)
 class Produkt:
     """
-    Represents a single product with name, price, and quantity.
+    Represents a single product with name and quantity.
 
     Attributes:
         name (str): The name of the product.
-        preis (float): The price of the product.
         menge (int): The quantity of the product in stock.
     """
-    def __init__(self, name, preis, menge):
-        self.name = name  # Name of the product
-        self.preis = preis  # Price of the product
-        self.menge = menge  # Quantity of the product
+    def __init__(self, name, menge):
+        self.name = name  # Name des Produkts
+        self.menge = menge  # Menge des Produkts
 
 # 2. Klasse zur Verwaltung des Bestands
 class Bestand:
@@ -37,7 +28,7 @@ class Bestand:
         export_to_csv(filename): Exports the current stock to a CSV file.
     """
     def __init__(self):
-        self.produkte = {}  # Dictionary to store products by name
+        self.produkte = {}  # Speichert nur Produkte mit Namen und Mengen
 
     # 2.1 Produkt zum Bestand hinzufügen
     def add_produkt(self, produkt):
@@ -48,10 +39,8 @@ class Bestand:
         :param produkt: An instance of the Produkt class to be added to stock.
         """
         if produkt.name in self.produkte:
-            # If the product exists, increase the quantity
             self.produkte[produkt.name].menge += produkt.menge
         else:
-            # If the product does not exist, add it to the stock
             self.produkte[produkt.name] = produkt
 
     # 2.2 Produkt aus dem Bestand entfernen
@@ -63,7 +52,6 @@ class Bestand:
         :param menge: The quantity to be removed.
         """
         if name in self.produkte:
-            # Check if there is enough stock to remove the requested quantity
             if self.produkte[name].menge >= menge:
                 self.produkte[name].menge -= menge
             else:
@@ -104,9 +92,8 @@ class Bestand:
         with open(filepath, 'r') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
-                # Unpack each row to get product details
-                name, preis, menge = row
-                produkt = Produkt(name, float(preis), int(menge))
+                name, menge = row
+                produkt = Produkt(name, int(menge))
                 self.add_produkt(produkt)
 
     # 2.6 Aktuellen Bestand in eine CSV-Datei exportieren
@@ -120,5 +107,4 @@ class Bestand:
         with open(filepath, 'w') as csvfile:
             writer = csv.writer(csvfile)
             for produkt in self.produkte.values():
-                # Write each product's details to the CSV file
-                writer.writerow([produkt.name, produkt.preis, produkt.menge])
+                writer.writerow([produkt.name, produkt.menge])

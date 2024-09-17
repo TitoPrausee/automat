@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import Button, Label, DISABLED, simpledialog, messagebox
 from math import ceil
-import csv
 import os
-from UI.admin_panel import AdminPanel
+import csv
 from datetime import datetime
 from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
+from Backend.Tools.PriceCalculator import PriceCalculator  # Importiere PriceCalculator
+from UI.admin_panel import AdminPanel  # Importiere AdminPanel
 
 # Globale Variablen initialisieren
 global enteredSum, sumToEnter, change, transaction_id
@@ -14,29 +15,11 @@ global labelEnteredSum, labelSumToEnter, labelChange
 enteredSum = 0
 sumToEnter = 0
 change = 0
-transaction_id = 1  
+transaction_id = 1
 
 def create_window(root, price_calculator, stock_manager):
     global enteredSum, sumToEnter, change, transaction_id
     global labelEnteredSum, labelSumToEnter, labelChange
-
-    # Admin-Panel öffnen und die UI aktualisieren, wenn ein neues Produkt hinzugefügt wird
-    def open_admin_panel():
-        password = simpledialog.askstring("Passwort eingeben", "Bitte das Admin-Passwort eingeben:", show='*')
-        if password == "123": 
-            # Admin-Panel öffnen
-            admin_root = tk.Toplevel()
-            admin_root.title("Admin Panel")
-            csv_handler = CSVHandler()  # CSVHandler erstellen
-            
-            # Absoluter Pfad zur stock.csv
-            file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
-            
-            stock_manager = Stock(csv_handler, file_path)
-            AdminPanel(admin_root, stock_manager, update_ui)  # Übergib die Callback-Methode
-            admin_root.mainloop()
-        else:
-            messagebox.showerror("Fehler", "Falsches Passwort!")
 
     # Methode zum Aktualisieren der UI
     def update_ui():
@@ -48,7 +31,8 @@ def create_window(root, price_calculator, stock_manager):
 
     # Funktion zum Erstellen der UI
     def build_ui():
-        drinks = price_calculator.prices_data
+        drinks = price_calculator.prices_data  # Preise aus prices.csv
+        stock = stock_manager.stock_data  # Lagerbestand aus stock.csv
 
         drinksCountInRow = 3
         drinksRowsCount = ceil(len(drinks) / drinksCountInRow)
@@ -56,7 +40,8 @@ def create_window(root, price_calculator, stock_manager):
         for idx, (drink, price) in enumerate(drinks.items()):
             buttonRow = idx // drinksCountInRow
             buttonColumn = idx % drinksCountInRow
-            buttonText = f"{drink} - {price}€"
+            quantity = stock.get(drink, 0)  # Hole die Menge aus stock.csv
+            buttonText = f"{drink} - {price:.2f}€ (Menge: {quantity})"
 
             if stock_manager.is_in_stock(drink, 1):
                 button = Button(root, text=buttonText, command=lambda drink=drink, price=price: add_drink(drink, price, stock_manager))
@@ -87,13 +72,36 @@ def create_window(root, price_calculator, stock_manager):
         # Auffüllen-Button für Admin-Zugang
         Button(root, text="Auffüllen", command=open_admin_panel).grid(row=drinksRowsCount + 7, column=0)
 
+    # Admin-Panel öffnen und die UI aktualisieren, wenn ein neues Produkt hinzugefügt wird
+    def open_admin_panel():
+        password = simpledialog.askstring("Passwort eingeben", "Bitte das Admin-Passwort eingeben:", show='*')
+        if password == "123": 
+            # Admin-Panel öffnen
+            admin_root = tk.Toplevel()
+            admin_root.title("Admin Panel")
+            csv_handler = CSVHandler()  # CSVHandler erstellen
+            
+            # Absoluter Pfad zur stock.csv
+            stock_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
+            stock_manager = Stock(csv_handler, stock_file_path)
+            
+            # Absoluter Pfad zur prices.csv
+            prices_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'prices.csv')
+            price_calculator = PriceCalculator(csv_handler, prices_file_path)
+            
+            # AdminPanel mit price_calculator und stock_manager erstellen
+            AdminPanel(admin_root, stock_manager, price_calculator, update_ui)  # Übergib die Callback-Methode
+            admin_root.mainloop()
+        else:
+            messagebox.showerror("Fehler", "Falsches Passwort!")
+
     # Erstelle die UI beim Start
     build_ui()
 
 def add_drink(drink, price, stock_manager):
     global sumToEnter
     sumToEnter += price
-    stock_manager.update_stock(drink, 1)
+    stock_manager.update_stock(drink, -1)  # Verringere den Lagerbestand um 1
     update_labels()
     log_transaction(drink, 1, price, price)  # Loggt die Transaktion, 1 Menge pro Klick
 
