@@ -4,7 +4,7 @@ from math import ceil
 import os
 import csv
 from datetime import datetime
-from Backend.DataAccessors.Stock import Stock  # Korrekt importieren
+from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
 from Backend.Tools.PriceCalculator import PriceCalculator  # Importiere PriceCalculator
 from UI.admin_panel import AdminPanel  # Importiere AdminPanel
@@ -32,6 +32,10 @@ def create_window(root, price_calculator):
 
     # Methode zum Aktualisieren der UI
     def update_ui():
+        """
+        Diese Funktion wird aufgerufen, um die UI dynamisch zu aktualisieren,
+        wenn sich der Lagerbestand oder Preise ändern.
+        """
         # Entferne alle vorhandenen Widgets
         for widget in root.winfo_children():
             widget.destroy()
@@ -41,7 +45,7 @@ def create_window(root, price_calculator):
     # Funktion zum Erstellen der UI
     def build_ui():
         drinks = price_calculator.prices_data  # Preise aus prices.csv
-        stock = stock_manager.stock_data  # Lagerbestand aus Stock.csv
+        stock = stock_manager.stock_data  # Lagerbestand aus stock.csv
 
         drinksCountInRow = 3
         drinksRowsCount = ceil(len(drinks) / drinksCountInRow)
@@ -57,7 +61,7 @@ def create_window(root, price_calculator):
 
             # Button aktivieren, wenn das Produkt auf Lager ist, sonst deaktiviert
             if stock_manager.is_in_stock(drink, 1):
-                button = Button(root, text=buttonText, command=lambda drink=drink, price=price: add_drink(drink, price, stock_manager))
+                button = Button(root, text=buttonText, command=lambda drink=drink, price=price: add_drink(drink, price, stock_manager, update_ui))
             else:
                 button = Button(root, text=f"{drink} - AUSVERKAUFT", state=DISABLED)
 
@@ -89,31 +93,26 @@ def create_window(root, price_calculator):
 
     # Admin-Panel öffnen und die UI aktualisieren, wenn ein neues Produkt hinzugefügt wird
     def open_admin_panel():
+        """
+        Öffne das Admin-Panel, in dem Produkte hinzugefügt oder der Lagerbestand
+        aktualisiert werden kann. Nach Änderungen wird die UI dynamisch aktualisiert.
+        """
         password = simpledialog.askstring("Passwort eingeben", "Bitte das Admin-Passwort eingeben:", show='*')
         if password == "123": 
             # Admin-Panel öffnen
             admin_root = tk.Toplevel()
             admin_root.title("Admin Panel")
-            csv_handler = CSVHandler()  # CSVHandler erstellen
-            
-            # Absoluter Pfad zur stock.csv
-            stock_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
-            stock_manager = Stock(csv_handler, stock_file_path)
-            
-            # Absoluter Pfad zur prices.csv
-            prices_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'prices.csv')
-            price_calculator = PriceCalculator(csv_handler, prices_file_path)
-            
+
             # AdminPanel mit price_calculator und stock_manager erstellen
-            AdminPanel(admin_root, stock_manager, price_calculator, update_ui)  # Übergib die Callback-Methode
+            AdminPanel(admin_root, stock_manager, price_calculator, update_ui)  # Callback für UI-Aktualisierung
             admin_root.mainloop()
         else:
             messagebox.showerror("Fehler", "Falsches Passwort!")
 
-    # Erstelle die UI beim Start
+    # Starte die UI beim ersten Aufruf
     build_ui()
 
-def add_drink(drink, price, stock_manager):
+def add_drink(drink, price, stock_manager, update_ui_callback):
     global sumToEnter
     sumToEnter += price
 
@@ -122,6 +121,9 @@ def add_drink(drink, price, stock_manager):
 
     update_labels()
     log_transaction(drink, 1, price, price)  # Loggt die Transaktion, 1 Menge pro Klick
+
+    # UI dynamisch aktualisieren, um die geänderte Menge anzuzeigen
+    update_ui_callback()
 
 def update_labels():
     global enteredSum, sumToEnter, change
