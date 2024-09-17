@@ -4,9 +4,10 @@ import csv
 import os
 
 class AdminPanel:
-    def __init__(self, root, stock_manager):
+    def __init__(self, root, stock_manager, update_ui_callback):
         self.root = root
         self.stock_manager = stock_manager
+        self.update_ui_callback = update_ui_callback  # Callback für UI-Aktualisierung
 
         self.products_frame = tk.Frame(root)
         self.products_frame.pack()
@@ -15,7 +16,6 @@ class AdminPanel:
         self.new_product_frame.pack(pady=10)
 
         self.load_products()
-
         self.add_new_product_section()
 
     def load_products(self):
@@ -28,8 +28,20 @@ class AdminPanel:
         Label(self.products_frame, text="Bestand", width=10).grid(row=0, column=1)
         Label(self.products_frame, text="Aktionen", width=20).grid(row=0, column=2)
 
-        # Zeigt alle Produkte an
-        for idx, (product_name, quantity) in enumerate(self.stock_manager.stock_data.items(), start=1):
+        # Definiere die Standardprodukte (falls diese nicht schon in der CSV-Datei sind)
+        standard_products = {
+            "Cola": 0,
+            "Sprite": 0,
+            "Fanta": 0,
+            "Wasser": 0,
+            "Eistee": 0
+        }
+
+        # Mische Standardprodukte mit dem aktuellen Lagerbestand
+        all_products = {**standard_products, **self.stock_manager.stock_data}
+
+        # Zeigt alle Produkte an, auch wenn sie leer sind
+        for idx, (product_name, quantity) in enumerate(all_products.items(), start=1):
             Label(self.products_frame, text=product_name, width=20).grid(row=idx, column=0)
             Label(self.products_frame, text=str(quantity), width=10).grid(row=idx, column=1)
 
@@ -77,6 +89,9 @@ class AdminPanel:
         self.save_stock()
         self.load_products()
 
+        # UI der Kundenschnittstelle aktualisieren
+        self.update_ui_callback()  # Hier wird die Hauptansicht aktualisiert
+
     def save_stock(self):
         # Korrigierter Pfad zur stock.csv
         stock_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Backend', 'CSV', 'stock.csv')
@@ -99,5 +114,5 @@ if __name__ == "__main__":
     stock_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Backend', 'CSV', 'stock.csv')
     stock_manager = Stock(csv_handler, stock_file_path)
 
-    app = AdminPanel(root, stock_manager)
+    app = AdminPanel(root, stock_manager, update_ui_callback=lambda: print("UI aktualisieren"))  # Dummy-Callback für Test
     root.mainloop()
