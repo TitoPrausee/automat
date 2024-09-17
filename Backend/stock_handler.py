@@ -46,18 +46,19 @@ class Bestand:
     # 2.2 Produkt aus dem Bestand entfernen
     def remove_produkt(self, name, menge):
         """
-        Remove a specific quantity of a product from the stock.
+        Entfernt eine bestimmte Menge eines Produkts aus dem Lagerbestand.
 
-        :param name: The name of the product to be removed.
-        :param menge: The quantity to be removed.
+        :param name: Name des Produkts, das entfernt werden soll.
+        :param menge: Die Menge, die entfernt werden soll.
         """
         if name in self.produkte:
             if self.produkte[name].menge >= menge:
                 self.produkte[name].menge -= menge
             else:
-                print("Nicht genug Produkte auf Lager.")
+                print(f"Nicht genug {name} auf Lager. Verfügbar: {self.produkte[name].menge}")
+                self.produkte[name].menge = 0  # Setze die Menge auf 0, da nicht genug verfügbar ist
         else:
-            print("Produkt nicht gefunden.")
+            print(f"Produkt {name} nicht gefunden.")
 
     # 2.3 Produkt anhand des Namens abrufen
     def get_produkt(self, name):

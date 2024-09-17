@@ -4,7 +4,7 @@ from math import ceil
 import os
 import csv
 from datetime import datetime
-from Backend.DataAccessors.Stock import Stock
+from Backend.DataAccessors.Stock import Stock  # Korrekt importieren
 from Backend.CSVHandler import CSVHandler
 from Backend.Tools.PriceCalculator import PriceCalculator  # Importiere PriceCalculator
 from UI.admin_panel import AdminPanel  # Importiere AdminPanel
@@ -17,9 +17,18 @@ sumToEnter = 0
 change = 0
 transaction_id = 1
 
-def create_window(root, price_calculator, stock_manager):
+# Globale Variablen für Labels
+labelEnteredSum = None
+labelSumToEnter = None
+labelChange = None
+
+def create_window(root, price_calculator):
     global enteredSum, sumToEnter, change, transaction_id
     global labelEnteredSum, labelSumToEnter, labelChange
+
+    csv_handler = CSVHandler()  # CSVHandler erstellen
+    stock_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
+    stock_manager = Stock(csv_handler, stock_file_path)  # Verwende die 'Stock'-Klasse
 
     # Methode zum Aktualisieren der UI
     def update_ui():
@@ -32,17 +41,21 @@ def create_window(root, price_calculator, stock_manager):
     # Funktion zum Erstellen der UI
     def build_ui():
         drinks = price_calculator.prices_data  # Preise aus prices.csv
-        stock = stock_manager.stock_data  # Lagerbestand aus stock.csv
+        stock = stock_manager.stock_data  # Lagerbestand aus Stock.csv
 
         drinksCountInRow = 3
         drinksRowsCount = ceil(len(drinks) / drinksCountInRow)
 
+        # Dynamische Generierung der Buttons basierend auf Produkte und Lagerbestand
         for idx, (drink, price) in enumerate(drinks.items()):
             buttonRow = idx // drinksCountInRow
             buttonColumn = idx % drinksCountInRow
             quantity = stock.get(drink, 0)  # Hole die Menge aus stock.csv
+
+            # Button-Text, der Produktname, Preis und Menge anzeigt
             buttonText = f"{drink} - {price:.2f}€ (Menge: {quantity})"
 
+            # Button aktivieren, wenn das Produkt auf Lager ist, sonst deaktiviert
             if stock_manager.is_in_stock(drink, 1):
                 button = Button(root, text=buttonText, command=lambda drink=drink, price=price: add_drink(drink, price, stock_manager))
             else:
@@ -50,6 +63,8 @@ def create_window(root, price_calculator, stock_manager):
 
             button.grid(row=buttonRow, column=buttonColumn)
 
+        # Labels für den eingegebenen Betrag, den noch zu zahlenden Betrag und das Wechselgeld
+        global labelEnteredSum, labelSumToEnter, labelChange
         labelEnteredSum = Label(root, text="Eingegeben: 0")
         labelEnteredSum.grid(row=drinksRowsCount + 1, column=0)
         labelSumToEnter = Label(root, text="Noch einzugeben: 0")
@@ -101,7 +116,10 @@ def create_window(root, price_calculator, stock_manager):
 def add_drink(drink, price, stock_manager):
     global sumToEnter
     sumToEnter += price
-    stock_manager.update_stock(drink, -1)  # Verringere den Lagerbestand um 1
+
+    # Verringere den Lagerbestand um 1
+    stock_manager.update_stock(drink, 1)  # Verwende die 'update_stock'-Methode der 'Stock'-Klasse
+
     update_labels()
     log_transaction(drink, 1, price, price)  # Loggt die Transaktion, 1 Menge pro Klick
 
