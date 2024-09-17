@@ -104,7 +104,7 @@ def log_transaction(item, quantity, price, total):
 def open_admin_panel():
     # Passwortabfrage
     password = simpledialog.askstring("Passwort eingeben", "Bitte das Admin-Passwort eingeben:", show='*')
-    if password == "tito": 
+    if password == "123": 
         # Admin-Panel öffnen
         admin_root = tk.Toplevel()
         admin_root.title("Admin Panel")
