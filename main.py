@@ -21,10 +21,13 @@ def main():
     # 1.4 Hauptfenster erstellen
     root = tk.Tk()
     root.title("Automat")
-    root.geometry('700x1000')
+    root.geometry('600x800')
+    root.minsize(width=600, height=800)
+    root.maxsize(width=600, height=800)
 
     # 1.5 UI initialisieren
-    window.create_window(root, price_calculator, stock_manager)
+    # window.create_window(root, price_calculator, stock_manager)
+    window.create_UI(root, price_calculator, stock_manager)
 
     # 1.6 Haupt-Event-Loop starten
     root.mainloop()

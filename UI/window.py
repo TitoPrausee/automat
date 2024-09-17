@@ -1,7 +1,7 @@
 # UI/window.py
 
 import tkinter as tk
-from tkinter import Button, Label, DISABLED, simpledialog, messagebox
+from tkinter import Button, Label, DISABLED, simpledialog, messagebox, Frame
 from math import ceil
 import csv
 import os
@@ -11,12 +11,45 @@ from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
 
 # Globale Variablen initialisieren
-global enteredSum, sumToEnter, change, transaction_id
+global enteredSum, sumToEnter, change, transaction_id, guthaben
 global labelEnteredSum, labelSumToEnter, labelChange
+guthaben = 0
 enteredSum = 0
 sumToEnter = 0
 change = 0
 transaction_id = 1  
+
+def create_UI(root, price_calculator, stock_manager):
+    
+    root.grid_columnconfigure(0, weight=1)  # Column 0
+    root.grid_columnconfigure(1, weight=1)  # Column 1 (centered labels will be here)
+    root.grid_columnconfigure(2, weight=1)  # Column 2
+
+    
+    Label(root, text="Getränkeautomat", font=("Arial", 22)).grid(row=0, column=1, sticky="NSEW", padx=10)
+
+    guthabenLabel = Label(
+        root,
+        text="Guthaben: " + guthaben.__str__(),
+        font=("Arial", 20),
+        ).grid(row=1, column=1, pady=30, sticky="NESW")
+
+    moneyFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken", height=250)
+    moneyFrame.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
+    moneyFrame.grid_columnconfigure(0, weight=1)
+    moneyFrame.grid_columnconfigure(1, weight=1)
+    moneyFrame.grid_columnconfigure(2, weight=1)
+
+    drinksFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken", height=250)
+    drinksFrame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
+    drinksFrame.grid_columnconfigure(0, weight=1)
+    drinksFrame.grid_columnconfigure(1, weight=1)
+    drinksFrame.grid_columnconfigure(2, weight=1)
+
+    Button(root, text="Ausgabe", state=DISABLED).grid(row=4, column=1, sticky="ns", pady=10)
+
+    # assigning this button to col1 shifts the whole UI to the right for some reason
+    Button(root, text="Wartung").grid(row=5, column=1, padx=20)
 
 def create_window(root, price_calculator, stock_manager):
     global enteredSum, sumToEnter, change, transaction_id
