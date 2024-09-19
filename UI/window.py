@@ -46,7 +46,7 @@ def create_window(root, price_calculator):
         Label(root, text="Getränkeautomat", font=("Arial", 22)).grid(row=0, column=1, sticky="NSEW", padx=10)
 
         # Create balance label
-        guthabenLabel = Label(root, text="Guthaben: " + str(guthaben), font=("Arial", 20))
+        guthabenLabel = Label(root, text=f"Guthaben: {guthaben:.2f}€", font=("Arial", 20))  # Ensure the € symbol is included
         guthabenLabel.grid(row=1, column=1, pady=30, sticky="NESW")
 
         # Create frame for money buttons
@@ -126,7 +126,9 @@ def add_drink(drink, price, stock_manager, update_ui_callback):
 def update_labels():
     # Update labels for entered sum, sum to enter, and change
     global guthabenLabel
-    guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")  # Update balance label
+    # Ensure the € symbol is always present after the balance
+    guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")  # Update balance label with € symbol
+
 
 def reset():
     # Reset all values and update labels
@@ -153,7 +155,8 @@ def enter_money(value):
     # Enter money and update balance label
     global guthabenLabel, guthaben
     guthaben += value
-    guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")
+    # Ensure the € symbol is always present after the balance
+    guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")  # Update balance label with € symbol
 
 def reset_money():
     # Reset balance to zero and update balance label
