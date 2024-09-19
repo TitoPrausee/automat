@@ -49,8 +49,8 @@ def create_window(root, price_calculator):
             row=0, column=1, sticky="NSEW", padx=10)
 
         # Create balance label
-        guthabenLabel = Label(root, text="Guthaben: " +
-                              str(guthaben), font=("Arial", 20))
+        guthabenLabel = Label(root, text=f"Guthaben: {
+                              guthaben:.2f}€", font=("Arial", 20))
         guthabenLabel.grid(row=1, column=1, pady=30, sticky="NESW")
 
         # Create frame for money buttons
