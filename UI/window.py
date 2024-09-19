@@ -1,21 +1,90 @@
 import tkinter as tk
-from tkinter import Button, Label, DISABLED, simpledialog, messagebox
-from math import ceil
-import os
+from tkinter import Button, Label, DISABLED, simpledialog, messagebox, Frame
+from math import ceil, floor
 import csv
+import os
+from UI.admin_panel import AdminPanel
 from datetime import datetime
 from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
 from Backend.Tools.PriceCalculator import PriceCalculator  # Import PriceCalculator
 from UI.admin_panel import AdminPanel  # Import AdminPanel
 
-# Global variables initialization
-global enteredSum, sumToEnter, change, transaction_id
-global labelEnteredSum, labelSumToEnter, labelChange
+# Globale Variablen initialisieren
+global enteredSum, sumToEnter, change, transaction_id, guthaben
+global labelEnteredSum, labelSumToEnter, labelChange, guthabenLabel
+global drinksFrame
+guthaben = 0
 enteredSum = 0
 sumToEnter = 0
 change = 0
 transaction_id = 1
+
+def create_UI(root, price_calculator):
+    global guthabenLabel
+    global drinksFrame
+
+    root.grid_columnconfigure(0, weight=1)  # Column 0
+    root.grid_columnconfigure(1, weight=1)  # Column 1 (centered labels will be here)
+    root.grid_columnconfigure(2, weight=1)  # Column 2
+    
+    Label(root, text="Getränkeautomat", font=("Arial", 22)).grid(row=0, column=1, sticky="NSEW", padx=10)
+
+    guthabenLabel = Label(root,text="Guthaben: " + guthaben.__str__(),font=("Arial", 20))
+    guthabenLabel.grid(row=1, column=1, pady=30, sticky="NESW")
+
+    moneyFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken", height=250)
+    moneyFrame.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
+    moneyFrame.grid_columnconfigure(0, weight=1)
+    moneyFrame.grid_columnconfigure(1, weight=1)
+    moneyFrame.grid_columnconfigure(2, weight=1)
+
+    # Geld-Eingabe Buttons für Münzen
+    coin_values = [0.5, 1, 2]
+    for i, coin in enumerate(coin_values):
+        Button(moneyFrame, highlightbackground="white", text=f"{coin}€", command=lambda value=coin: enter_money(value)).grid(row=0, column=i, sticky="we")
+
+    # Geld-Eingabe Buttons für Scheine
+    bill_values = [10, 5, 20]
+    for i, bill in enumerate(bill_values):
+        Button(moneyFrame, highlightbackground="white", width=8, text=f"{bill}€", command=lambda value=bill: enter_money(value)).grid(row=1, column=i, sticky="we")
+
+
+    drinksFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken", height=250)
+    drinksFrame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
+    drinksFrame.grid_columnconfigure(0, weight=1)
+    drinksFrame.grid_columnconfigure(1, weight=1)
+    drinksFrame.grid_columnconfigure(2, weight=1)
+    #drinks should be added here
+    gernerate_drink_buttons(["Cola", "Fanta", "Sprite", "Wasser"])
+
+    Button(root, text="Ausgabe", state=DISABLED).grid(row=4, column=1, sticky="ns", pady=10)
+    # Button(root, text="Abbruch", command=reset_money).grid(row=4, column=0)
+    # Button(root, text="Wartung").grid(row=4, column=3)
+
+def gernerate_drink_buttons(drinks):
+    drinksperrow = 3
+    global drinksFrame
+    for i, drink in enumerate(drinks):
+        currentColumn = i % drinksperrow
+        currentRow = floor(i / drinksperrow)
+        if currentColumn < 0:
+            currentColumn = 0
+        Button(drinksFrame, text=drink, highlightbackground="white", width=7).grid(column=currentColumn, row=currentRow, sticky="ew")
+
+def enter_money(value):
+    global guthabenLabel, guthaben
+    guthaben = guthaben + value
+    guthabenLabel.config(text=f"Guhaben: {guthaben}")
+
+def reset_money():
+    global guthabenLabel, guthaben
+    guthaben = 0
+    guthabenLabel.config(text="Guhaben: 0")
+
+#---------------------------------------------
+#ignore everything below
+#---------------------------------------------
 
 # Global variables for labels
 labelEnteredSum = None
