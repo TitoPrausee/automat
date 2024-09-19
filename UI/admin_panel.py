@@ -6,30 +6,37 @@ import os
 class AdminPanel:
     def __init__(self, root, stock_manager, price_calculator, update_ui_callback):
         """
-        Initializes the admin panel where users can manage stock and prices.
+        Initializes the AdminPanel class which allows the user to manage products,
+        update stock levels, and set prices. It also provides an interface for 
+        dynamically adding new products.
 
         :param root: The Tkinter root window (admin window).
         :param stock_manager: Instance of the Stock class to manage stock data.
         :param price_calculator: Instance of the PriceCalculator class to manage product prices.
-        :param update_ui_callback: Callback function to update the UI in the main window.
+        :param update_ui_callback: Callback function to update the UI when changes are made.
         """
         self.root = root
         self.stock_manager = stock_manager
         self.price_calculator = price_calculator
         self.update_ui_callback = update_ui_callback  # Callback for UI update
 
+        # Frame for displaying existing products
         self.products_frame = tk.Frame(root)
         self.products_frame.pack()
 
+        # Frame for adding new products
         self.new_product_frame = tk.Frame(root)
         self.new_product_frame.pack(pady=10)
 
+        # Load and display the existing products
         self.load_products()
+        # Display the section to add a new product
         self.add_new_product_section()
 
     def load_products(self):
         """
-        Loads and displays the list of products with their stock levels in the admin panel.
+        Loads the products from stock and displays each product with its current stock level.
+        Provides buttons to increase/decrease stock or remove a product.
         """
         # Remove old widgets before reloading products
         for widget in self.products_frame.winfo_children():
@@ -42,6 +49,7 @@ class AdminPanel:
 
         # Display all products with stock levels and action buttons
         for idx, (product_name, quantity) in enumerate(self.stock_manager.stock_data.items(), start=1):
+            # Get the product price
             price = self.price_calculator.get_price(product_name)
             Label(self.products_frame, text=f"{product_name} - {price:.2f} €", width=20).grid(row=idx, column=0)
             Label(self.products_frame, text=str(quantity), width=10).grid(row=idx, column=1)
@@ -53,30 +61,19 @@ class AdminPanel:
 
     def update_stock(self, product_name, amount):
         """
-        Updates the stock level of a specific product in the admin panel and calls the
-        callback to update the UI in the main window.
+        Updates the stock level of a specific product by increasing or decreasing the quantity.
 
         :param product_name: The name of the product to update.
         :param amount: The amount to adjust the stock by (positive or negative).
         """
         if product_name in self.stock_manager.stock_data:
-            # Increment or decrement the stock quantity
+            # Update the stock quantity
             self.stock_manager.stock_data[product_name] += amount
-
-            # Make sure the stock doesn't go below 0
             if self.stock_manager.stock_data[product_name] < 0:
-                self.stock_manager.stock_data[product_name] = 0  # Prevent negative stock
+                self.stock_manager.stock_data[product_name] = 0  # Ensure stock doesn't go below 0
+            self.save_stock()  # Save updated stock data to CSV
+            self.load_products()  # Reload the products to reflect changes
 
-            # Save the updated stock data
-            self.save_stock()
-
-            # Reload the product list to reflect changes in the Admin Panel
-            self.load_products()
-
-            # Call the callback to update the UI in the main window
-            self.update_ui_callback()
-
-        # Removed `focus_force()` to prevent errors when the window doesn't exist
     def remove_product(self, product_name):
         """
         Removes a product from both the stock and price data after confirming with the user.
@@ -84,14 +81,12 @@ class AdminPanel:
         :param product_name: The name of the product to remove.
         """
         if messagebox.askyesno("Confirm", f"Are you sure you want to remove {product_name}?"):
+            # Remove the product from stock and price data
             del self.stock_manager.stock_data[product_name]
             del self.price_calculator.prices_data[product_name]
-            self.save_stock()
-            self.save_prices()
-            self.load_products()
-            
-            # Call the callback to update the main UI after removing the product
-            self.update_ui_callback()
+            self.save_stock()  # Save updated stock data to CSV
+            self.save_prices()  # Save updated price data to CSV
+            self.load_products()  # Reload the products to reflect changes
 
     def add_new_product_section(self):
         """
@@ -173,6 +168,7 @@ class AdminPanel:
         """
         Saves the current stock data to the stock.csv file.
         """
+        # Corrected path to stock.csv
         stock_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Backend', 'CSV', 'stock.csv')
         with open(stock_file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
@@ -184,6 +180,7 @@ class AdminPanel:
         """
         Saves the current price data to the prices.csv file.
         """
+        # Corrected path to prices.csv
         prices_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Backend', 'CSV', 'prices.csv')
         with open(prices_file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
