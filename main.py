@@ -22,14 +22,12 @@ def main():
 
     # 1.4 Create the main window (root window) where the application UI will be rendered
     root = tk.Tk()
-    root.title("Automat")
-    root.geometry('600x800')
-    root.minsize(width=600, height=800)
-    root.maxsize(width=600, height=800)
+    root.title("Automat")  # Set the window title
+    root.geometry('700x1000')  # Set the window size (width x height)
 
     # 1.5 Initialize the UI by calling the create_window function from window.py
     # Only pass root (the main window) and price_calculator (for handling prices)
-    window.create_UI(root, price_calculator)
+    window.create_window(root, price_calculator)
 
     # 1.6 Start the main event loop (Tkinter's main loop for handling events)
     root.mainloop()
