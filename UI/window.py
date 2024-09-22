@@ -6,7 +6,6 @@ import csv
 from datetime import datetime
 from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
-from Backend.Tools.PriceCalculator import PriceCalculator
 from UI.admin_panel import AdminPanel
 
 # Global variables initialization
@@ -67,13 +66,13 @@ def create_window(root, price_calculator):
         coin_values = [0.5, 1, 2]
         for i, coin in enumerate(coin_values):
             Button(moneyFrame, highlightbackground="white", width=8, text=f"{
-                   coin}€", command=lambda value=coin: enter_money(value)).grid(row=0, column=i)
+                   coin}€", command=lambda value=coin: enter_money(value)).grid(row=0, column=i, sticky="ew")
 
         # Create bill buttons
         bill_values = [10, 5, 20]
         for i, bill in enumerate(bill_values):
             Button(moneyFrame, highlightbackground="white", width=8, text=f"{
-                   bill}€", command=lambda value=bill: enter_money(value)).grid(row=1, column=i)
+                   bill}€", command=lambda value=bill: enter_money(value)).grid(row=1, column=i, sticky="ew")
 
         # Create frame for drink buttons
         drinksFrame = tk.Frame(
@@ -106,7 +105,7 @@ def create_window(root, price_calculator):
                                 drink} - SOLD OUT", state=DISABLED)
 
             button.grid(column=buttonColumn,
-                        row=buttonRow, sticky="ew", padx=2)
+                        row=buttonRow, sticky="ew")
 
         # Create restock button at the bottom of the window, spanning all columns
         Button(root, text="Restock", command=open_admin_panel, font=("Arial", 16), width=20).grid(
