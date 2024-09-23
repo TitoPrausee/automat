@@ -1,31 +1,36 @@
 # 1. Klasse zur Preiskalkulation
 class PriceCalculator:
     """
-    PriceCalculator is responsible for handling the prices of products
-    and retrieving the price of a specific product.
+    PriceCalculator ist für die Verwaltung der Preise von Produkten und
+    das Abrufen des Preises eines bestimmten Produkts zuständig.
 
-    Methods:
-        get_price(drink): Returns the price of the given drink.
+    Methoden:
+        get_price(drink): Gibt den Preis des angegebenen Getränks zurück.
     """
 
     # 1.1 Konstruktor der Klasse
     def __init__(self, csv_handler, file_path):
         """
-        Initializes the PriceCalculator with the CSV handler and the file path.
+        Initialisiert den PriceCalculator mit dem CSV-Handler und dem Dateipfad.
 
-        :param csv_handler: Instance of CSVHandler for reading CSV data.
-        :param file_path: Path to the CSV file containing price data.
+        :param csv_handler: Instanz von CSVHandler zum Lesen von CSV-Daten.
+        :param file_path: Pfad zur CSV-Datei mit den Preisdaten.
         """
-        self.csv_handler = csv_handler  # Handler for CSV operations
-        self.file_path = file_path  # Path to the CSV file
-        self.prices_data = self.csv_handler.read_csv(self.file_path)  # Load price data from CSV
+        # Handler für CSV-Operationen (z. B. Lesen der CSV-Datei)
+        self.csv_handler = csv_handler  
+        # Pfad zur CSV-Datei, die die Preisdaten enthält
+        self.file_path = file_path  
+        # Laden der Preisdaten aus der CSV-Datei in ein Dictionary
+        self.prices_data = self.csv_handler.read_csv(self.file_path)  
 
     # 1.2 Preis eines bestimmten Produkts abrufen
     def get_price(self, drink):
         """
-        Returns the price of the given drink.
+        Gibt den Preis des angegebenen Getränks zurück.
 
-        :param drink: The name of the drink to retrieve the price for.
-        :return: The price of the drink, or 0 if not found.
+        :param drink: Der Name des Getränks, dessen Preis abgerufen werden soll.
+        :return: Der Preis des Getränks oder 0, wenn es nicht gefunden wurde.
         """
+        # Verwenden der get-Methode des Dictionaries, um den Preis abzurufen
+        # Gibt 0 zurück, wenn das Getränk nicht gefunden wird (Standardwert)
         return self.prices_data.get(drink, 0)

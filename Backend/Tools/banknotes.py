@@ -1,30 +1,30 @@
-# 1. List of supported banknotes
-supportedBanknotes = [10, 5, 2, 1]  # Supported banknote denominations in descending order
+# Liste der unterstützten Banknoten
+supportedBanknotes = [10, 5, 2, 1]  # Unterstützte Banknotenwerte in absteigender Reihenfolge
 
-# 2. Function to convert a sum into banknotes
+# Funktion zur Umrechnung einer Summe in Banknoten
 def sumToBanknotes(sum):
     """
-    Converts a given sum into the minimum number of banknotes.
+    Rechnet eine gegebene Summe in die minimale Anzahl von Banknoten um.
 
-    :param sum: The sum of money to be converted into banknotes.
-    :return: A dictionary with banknote denominations as keys and their counts as values.
+    :param sum: Die Geldsumme, die in Banknoten umgerechnet werden soll.
+    :return: Ein Dictionary mit Banknotenwerten als Schlüssel und deren Anzahl als Werte.
     """
-    banknotes = {}  # Dictionary to store the count of each banknote
+    banknotes = {}  # Dictionary zum Speichern der Anzahl jeder Banknote
     for note in supportedBanknotes:
-        # Keep subtracting the note value from the sum until the sum is smaller than the note
+        # Den Notenwert so lange von der Summe abziehen, bis die Summe kleiner als die Note ist
         while sum >= note:
-            sum -= note  # Reduce the sum by the value of the banknote
-            banknotes[str(note)] = banknotes.get(str(note), 0) + 1  # Increment the count of the banknote
-    return banknotes  # Return the dictionary of banknotes
+            sum -= note  # Reduzieren der Summe um den Wert der Banknote
+            banknotes[str(note)] = banknotes.get(str(note), 0) + 1  # Erhöhen der Anzahl der Banknote
+    return banknotes  # Rückgabe des Dictionary mit den Banknoten
 
-# 3. Function to format banknotes as a string
+# Funktion zum Formatieren von Banknoten als String
 def formatBanknotes(banknoteDict):
     """
-    Formats a dictionary of banknotes into a readable string.
+    Formatiert ein Dictionary mit Banknoten in einen lesbaren String.
 
-    :param banknoteDict: A dictionary with banknote denominations as keys and their counts as values.
-    :return: A string that lists the number of each banknote.
+    :param banknoteDict: Ein Dictionary mit Banknotenwerten als Schlüssel und deren Anzahl als Werte.
+    :return: Ein String, der die Anzahl jeder Banknote auflistet.
     """
-    # Create a list of formatted strings for each banknote (e.g., "10€ x 2")
+    # Erstellen einer Liste mit formatierten Strings für jede Banknote (z. B. "10€ x 2")
     formatted_list = [f"{note}€ x {count}" for note, count in banknoteDict.items()]
-    return ", ".join(formatted_list)  # Join the formatted strings with commas and return the result
+    return ", ".join(formatted_list)  # Verbinden der formatierten Strings mit Kommas und Rückgabe des Ergebnisses

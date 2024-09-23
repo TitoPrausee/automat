@@ -1,69 +1,69 @@
-import csv  # Module for working with CSV files
-import os   # Module for working with operating system functionalities
+import csv  # Modul für die Arbeit mit CSV-Dateien
+import os   # Modul für die Arbeit mit Betriebssystemfunktionen
 
-# 1. Class to manage price data
+# 1. Klasse zur Verwaltung der Preisdaten
 class Price:
     """
-    Handles reading and updating prices from and to a CSV file.
+    Verwaltet das Lesen und Aktualisieren von Preisen aus und in eine CSV-Datei.
 
-    Attributes:
-        _dirname: Directory path to the location of the CSV file.
-        _csvPath: Full path to the prices CSV file.
+    Attribute:
+        _dirname: Verzeichnispfad zum Speicherort der CSV-Datei.
+        _csvPath: Vollständiger Pfad zur CSV-Datei mit den Preisen.
     """
 
-    # 1.1 Static attributes for paths
-    _dirname = os.path.dirname(os.path.dirname(__file__))  # Directory name for the CSV directory
-    _csvPath = os.path.join(_dirname, 'CSV/price.csv')  # Full path to the CSV file
+    # 1.1 Statische Attribute für Pfade
+    _dirname = os.path.dirname(os.path.dirname(__file__))  # Verzeichnisname für das CSV-Verzeichnis
+    _csvPath = os.path.join(_dirname, 'CSV/price.csv')  # Vollständiger Pfad zur CSV-Datei
 
-    # 1.2 Method to read all prices from the CSV file
+    # 1.2 Methode zum Lesen aller Preise aus der CSV-Datei
     @staticmethod
     def readAllPrices():
         """
-        Reads all prices from the CSV file and returns them as a dictionary.
+        Liest alle Preise aus der CSV-Datei und gibt sie als Dictionary zurück.
 
-        :return: A dictionary with product names as keys and prices as values.
+        :return: Ein Dictionary mit Produktnamen als Schlüssel und Preisen als Werte.
         """
-        pricesData = {}  # Dictionary to store product names and their prices
+        pricesData = {}  # Dictionary zum Speichern von Produktnamen und deren Preisen
         with open(Price._csvPath, "r", newline='') as csvFile:
             reader = csv.DictReader(csvFile)
-            # Iterate through each row and store the product name and price as a float
+            # Iteration über jede Zeile und Speichern des Produktnamens und des Preises als Float
             for row in reader:
-                pricesData[row['name']] = float(row['price'])  # Store price as a float
+                pricesData[row['name']] = float(row['price'])  # Preis als Float speichern
 
-        return pricesData  # Return the dictionary containing product prices
+        return pricesData  # Rückgabe des Dictionaries mit den Produktpreisen
 
-    # 1.3 Method to update the price of a product in the CSV file
+    # 1.3 Methode zum Aktualisieren des Preises eines Produkts in der CSV-Datei
     @staticmethod
     def updatePrice(name, price):
         """
-        Updates the price of a specific product in the CSV file.
+        Aktualisiert den Preis eines bestimmten Produkts in der CSV-Datei.
 
-        :param name: The name of the product to update.
-        :param price: The new price of the product.
+        :param name: Der Name des zu aktualisierenden Produkts.
+        :param price: Der neue Preis des Produkts.
         """
-        # Check if the CSV file exists
+        # Überprüfung, ob die CSV-Datei existiert
         if not os.path.isfile(Price._csvPath):
             return
 
-        # Read all data from the CSV file
+        # Lesen aller Daten aus der CSV-Datei
         with open(Price._csvPath, "r", newline='') as csvFile:
             reader = csv.DictReader(csvFile)
-            priceData = list(reader)  # Convert the reader object to a list for easier manipulation
+            priceData = list(reader)  # Konvertieren des Reader-Objekts in eine Liste zur einfacheren Bearbeitung
 
-        # Create a dictionary of current prices
+        # Erstellen eines Dictionaries mit den aktuellen Preisen
         priceDict = {item['name']: float(item['price']) for item in priceData}
 
-        # Update the price for the specified product
+        # Aktualisieren des Preises für das angegebene Produkt
         if name in priceDict:
             priceDict[name] = price
 
-        # Prepare the updated price data for writing back to the CSV file
+        # Vorbereiten der aktualisierten Preisdaten für das Zurückschreiben in die CSV-Datei
         updatedPriceData = [{'name': name, 'price': price} for name, price in priceDict.items()]
 
-        # Write the updated data back to the CSV file
+        # Schreiben der aktualisierten Daten zurück in die CSV-Datei
         with open(Price._csvPath, "w", newline='') as csvFile:
             fieldnames = ['name', 'price']
             writer = csv.DictWriter(csvFile, fieldnames)
-            writer.writeheader()  # Write the header row (name, price)
+            writer.writeheader()  # Schreiben der Kopfzeile (Name, Preis)
             for item in updatedPriceData:
-                writer.writerow(item)  # Write each product's name and updated price
+                writer.writerow(item)  # Schreiben des Namens und des aktualisierten Preises jedes Produkts
