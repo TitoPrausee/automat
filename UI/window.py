@@ -9,15 +9,13 @@ from Backend.CSVHandler import CSVHandler
 from UI.admin_panel import AdminPanel
 
 # Globale Variableninitialisierung
-global enteredSum, sumToEnter, change, transaction_id, guthaben, totalEntered, ordered_drinks
-# Initialisierung der globalen Variablen
+global enteredSum, sumToEnter, change, transaction_id, guthaben
+global guthabenLabel, drinksFrame, changeLabel
 guthaben = 0
 enteredSum = 0
 sumToEnter = 0
 change = 0
 transaction_id = 1
-totalEntered = 0
-ordered_drinks = {}
 
 # Globale Variablen für Labels
 guthabenLabel = None
@@ -30,7 +28,7 @@ def create_window(root, price_calculator):
     :param root: Das Tkinter-Hauptfenster.
     :param price_calculator: Instanz der PriceCalculator-Klasse zur Verwaltung der Produktpreise.
     """
-    global enteredSum, sumToEnter, change, transaction_id, guthaben, totalEntered, ordered_drinks
+    global enteredSum, sumToEnter, change, transaction_id, guthaben
     global guthabenLabel, changeLabel
 
     csv_handler = CSVHandler()
@@ -115,13 +113,13 @@ def create_window(root, price_calculator):
 
             button.grid(column=buttonColumn, row=buttonRow, sticky="ew")
 
-        # Create bottom action buttons
-        Button(root, text="Wartung", command=open_admin_panel, font=("Arial", 16), width=20).grid(
-            row=drinksRowsCount + 4, column=0, pady=20, sticky="ew")
-        Button(root, text="Ausgabe", command=complete_transaction, font=("Arial", 16), width=20).grid(
-            row=drinksRowsCount + 4, column=1, pady=20, sticky="ew")
-        Button(root, text="Abbrechen", command=lambda: cancel_transaction(update_ui), font=("Arial", 16), width=20).grid(
-            row=drinksRowsCount + 4, column=2, pady=20, sticky="ew")
+        # Aktionsknöpfe
+        Button(root, text="Wartung", command=open_admin_panel, font=("Arial", 16), width=10, cursor="hand2").grid(
+            row=4, column=0, pady=10, padx=10, sticky="ew")
+        Button(root, text="Ausgabe", command=complete_transaction, font=("Arial", 16), width=10, cursor="hand2").grid(
+            row=4, column=1, pady=10, padx=10, sticky="ew")
+        Button(root, text="Abbrechen", command=cancel_transaction, font=("Arial", 16), width=10, cursor="hand2").grid(
+            row=4, column=2, pady=10, padx=10, sticky="ew")
 
         # Rückgeld-Label
         changeLabel = Label(root, text=f"Rückgeld: {change:.2f}€", font=("Arial", 16))
@@ -132,7 +130,7 @@ def create_window(root, price_calculator):
         min_width = root.winfo_reqwidth()
         min_height = root.winfo_reqheight()
         root.minsize(min_width, min_height)
-        root.maxsize(height=60)  # adjust the height value to your liking
+        root.maxsize(height=600)  # adjust the height value to your liking
 
     def open_admin_panel():
         """
@@ -151,19 +149,19 @@ def create_window(root, price_calculator):
     build_ui()
 
 def add_drink(drink, price, stock_manager, update_ui_callback):
-    # Add drink to order and update stock
-    global sumToEnter, guthaben, ordered_drinks
+    """
+    Fügt ein Getränk zur Bestellung hinzu, aktualisiert den Bestand und protokolliert die Transaktion.
+
+    :param drink: Der Name des Getränks.
+    :param price: Der Preis des Getränks.
+    :param stock_manager: Instanz der Stock-Klasse zur Verwaltung der Bestandsdaten.
+    :param update_ui_callback: Callback-Funktion zum Aktualisieren der Benutzeroberfläche.
+    """
+    global sumToEnter, guthaben
     if guthaben >= price:
         sumToEnter += price
         guthaben -= price
         stock_manager.update_stock(drink, 1)
-
-        # Track the ordered drink in the dictionary
-        if drink in ordered_drinks:
-            ordered_drinks[drink] += 1
-        else:
-            ordered_drinks[drink] = 1
-
         update_labels()
         log_transaction(drink, 1, price, price)
         update_ui_callback()
@@ -174,38 +172,24 @@ def complete_transaction():
     """
     Schließt die aktuelle Transaktion ab, gibt Wechselgeld zurück und zeigt eine Bestätigungsnachricht an.
     """
-    global guthaben, change, ordered_drinks, totalEntered
+    global guthaben, change
     change = guthaben
     guthaben = 0
-    totalEntered = 0
-    ordered_drinks = {}
     update_labels()
     messagebox.showinfo("Transaktion abgeschlossen", f"Rückgeld: {change:.2f}€")
     change = 0  # Setzt das Wechselgeld nach der Anzeige der Nachricht zurück
 
-def cancel_transaction(update_ui):
-    # Cancel the transaction, return all money, and restore stock
-    global guthaben, change, ordered_drinks, totalEntered
-
-    csv_handler = CSVHandler()
-    stock_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
-    stock_manager = Stock(csv_handler, stock_file_path)
-
-    # Return the stock of the ordered drinks
-    for drink, quantity in ordered_drinks.items():
-        stock_manager.update_stock(drink, -quantity)  # Restock the ordered items
-
-    # Reset the ordered drinks dictionary
-    ordered_drinks = {}
-
-    # Handle the refund and UI updates
-    change = totalEntered
+def cancel_transaction():
+    """
+    Bricht die aktuelle Transaktion ab, gibt das gesamte eingeworfene Geld zurück
+    und zeigt eine Benachrichtigung an.
+    """
+    global guthaben, change
+    change = guthaben
     guthaben = 0
     update_labels()
-    messagebox.showinfo("Transaktion abgebrochen", f"Rückgeld: {totalEntered:.2f}€")
-    update_ui()
-    change = 0
-    totalEntered = 0  # Reset after showing message
+    messagebox.showinfo("Transaktion abgebrochen", f"Rückgeld: {change:.2f}€")
+    change = 0  # Setzt das Wechselgeld nach der Anzeige der Nachricht zurück
 
 def update_labels():
     """
@@ -235,9 +219,12 @@ def log_transaction(item, quantity, price, total):
     transaction_id += 1
 
 def enter_money(value):
-    # Enter money and update balance label
-    global guthabenLabel, guthaben, totalEntered
-    totalEntered+= value
+    """
+    Fügt dem aktuellen Guthaben einen bestimmten Geldbetrag hinzu und aktualisiert das Guthaben-Label.
+
+    :param value: Der hinzuzufügende Geldbetrag.
+    """
+    global guthabenLabel, guthaben
     guthaben += value
     guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")
 
@@ -247,4 +234,4 @@ def reset_money():
     """
     global guthabenLabel, guthaben
     guthaben = 0
-    guthabenLabel.config(text="Guthaben: 0")
+    guthabenLabel.config(text="Guthaben: 0€")
