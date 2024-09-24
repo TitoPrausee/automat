@@ -27,12 +27,44 @@ class Transaction:
 
         :param item: Der Artikel, der im Transaktionsprotokoll gespeichert werden soll.
         """
-        # Öffnen der CSV-Datei im Anhängemodus ('a'), um neue Transaktionen hinzuzufügen
-        with open(Transaction.csvPath, 'a', newline='') as csvFile:
-            # Erstellen eines DictWriters, um eine Zeile mit der Spalte 'item' zu schreiben
-            # CSV-Writer mit 'item' als Spaltenname
-            writer = csv.DictWriter(
-                csvFile, ['transaction_id', 'item', 'quantity', 'price', 'total', 'timestamp'])
-            # Schreiben des Artikels in die CSV-Datei
-            # Schreiben des übergebenen Artikels in die CSV-Datei
-            writer.writerow(data)
+        data['transaction_id'] = Transaction.get_next_transaction_id()
+
+        if os.path.exists(Transaction.csvPath):
+            # Öffnen der CSV-Datei im Anhängemodus ('a'), um neue Transaktionen hinzuzufügen
+            with open(Transaction.csvPath, 'a') as csvFile:
+                # Erstellen eines DictWriters, um eine Zeile mit der Spalte 'item' zu schreiben
+                # CSV-Writer mit 'item' als Spaltenname
+                writer = csv.DictWriter(
+                    csvFile, ['transaction_id', 'item', 'quantity', 'price', 'total', 'timestamp'])
+                # Schreiben des Artikels in die CSV-Datei
+                # Schreiben des übergebenen Artikels in die CSV-Datei
+                writer.writerow(data)
+
+    # 1.3 Methode zum Abrufen der nächsten transaction_id
+    @staticmethod
+    def get_next_transaction_id():
+        """
+        Liest die CSV-Datei und gibt die nächste verfügbare transaction_id zurück.
+        Falls keine Transaktionen vorhanden sind, wird die transaction_id auf 1 gesetzt.
+
+        :return: Die nächste transaction_id (int)
+        """
+        # Standardmäßige transaction_id, falls keine Daten vorhanden sind
+        next_transaction_id = 1
+
+        # Überprüfen, ob die CSV-Datei existiert und Daten enthält
+        if os.path.exists(Transaction.csvPath):
+            with open(Transaction.csvPath, 'r') as csvFile:
+                reader = csv.DictReader(csvFile)
+                # Durchlaufen der Zeilen, um die höchste transaction_id zu finden
+                for row in reader:
+                    try:
+                        # Überprüfen, ob 'transaction_id' in der Zeile existiert
+                        current_id = int(row['transaction_id'])
+                        next_transaction_id = max(
+                            next_transaction_id, current_id + 1)
+                    except (ValueError, KeyError):
+                        # Bei ungültigen oder fehlenden Werten einfach überspringen
+                        continue
+
+        return next_transaction_id

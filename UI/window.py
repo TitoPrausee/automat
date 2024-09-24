@@ -10,13 +10,12 @@ from UI.admin_panel import AdminPanel
 from Backend.DataAccessors.Transaction import Transaction
 
 # Globale Variableninitialisierung
-global enteredSum, sumToEnter, change, transaction_id, guthaben
+global enteredSum, sumToEnter, change, guthaben
 global guthabenLabel, drinksFrame, changeLabel
 guthaben = 0
 enteredSum = 0
 sumToEnter = 0
 change = 0
-transaction_id = 1
 
 # Globale Variablen für Labels
 guthabenLabel = None
@@ -30,7 +29,7 @@ def create_window(root, price_calculator):
     :param root: Das Tkinter-Hauptfenster.
     :param price_calculator: Instanz der PriceCalculator-Klasse zur Verwaltung der Produktpreise.
     """
-    global enteredSum, sumToEnter, change, transaction_id, guthaben
+    global enteredSum, sumToEnter, change, guthaben
     global guthabenLabel, changeLabel
 
     csv_handler = CSVHandler()
@@ -225,18 +224,14 @@ def log_transaction(item, quantity, price, total):
     :param price: Der Preis pro Einheit des Artikels.
     :param total: Der Gesamtpreis der Transaktion.
     """
-    global transaction_id
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    transaction_data = {"transaction_id": transaction_id,
-                        "item": item,
+    transaction_data = {"item": item,
                         "quantity": quantity,
                         "price": price,
                         "total": total,
                         "timestamp": timestamp}
 
     Transaction.Save(transaction_data)
-
-    transaction_id += 1
 
 
 def enter_money(value):
