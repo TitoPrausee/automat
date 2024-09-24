@@ -2,8 +2,6 @@ import csv  # Modul für die Arbeit mit CSV-Dateien
 import os   # Modul für die Arbeit mit Betriebssystemfunktionen
 
 # 1. Klasse zur Verwaltung der Transaktionsdaten
-
-
 class Transaction:
     """
     Verwaltet das Speichern von Transaktionsdaten in einer CSV-Datei.

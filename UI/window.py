@@ -6,16 +6,16 @@ import csv
 from datetime import datetime
 from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
+from Backend.DataAccessors.Transaction import Transaction
 from UI.admin_panel import AdminPanel
 
 # Globale Variableninitialisierung
-global enteredSum, sumToEnter, change, transaction_id, guthaben, ordered_drinks, totalEntered
+global enteredSum, sumToEnter, change, guthaben, ordered_drinks, totalEntered
 global guthabenLabel, drinksFrame, changeLabel
 guthaben = 0  # Aktuelles Guthaben des Nutzers
 enteredSum = 0  # Gesamtsumme der eingegebenen Gelder
 sumToEnter = 0  # Summe, die für die aktuelle Transaktion eingegeben wurde
 change = 0  # Rückgeld
-transaction_id = 1  # Einzigartige Transaktions-ID
 totalEntered = 0  # Gesamtbetrag, der eingegeben wurde
 ordered_drinks = {}  # Bestellte Getränke und deren Mengen
 
@@ -30,7 +30,7 @@ def create_window(root, price_calculator):
     :param root: Das Tkinter-Hauptfenster.
     :param price_calculator: Instanz der PriceCalculator-Klasse zur Verwaltung der Produktpreise.
     """
-    global enteredSum, sumToEnter, change, transaction_id, guthaben
+    global enteredSum, sumToEnter, change, guthaben
     global guthabenLabel, changeLabel
 
     csv_handler = CSVHandler()
@@ -99,7 +99,7 @@ def create_window(root, price_calculator):
                 button = Button(drinksFrame, text=buttonText, command=lambda drink=drink,
                                 price=price: add_drink(drink, price, stock_manager, update_ui), cursor="hand2")
             else:
-                button = Button(drinksFrame, text=f"{drink} - SOLD OUT", state=DISABLED)
+                button = Button(drinksFrame, text=f"{drink} - Ausverkauft", state=DISABLED)
 
             button.grid(column=buttonColumn, row=buttonRow, sticky="ew")
 
@@ -120,8 +120,13 @@ def create_window(root, price_calculator):
         root.maxsize(height=600)
 
     def open_admin_panel():
+        dirname = os.path.dirname(os.path.dirname(__file__))
+     
+        pp = os.path.join(dirname, 'password.txt')
+        f = open(pp, "r")
+
         password = simpledialog.askstring("Enter Password", "Please enter the admin password:", show='*')
-        if password == "123":
+        if password == f.read():
             admin_root = tk.Toplevel()
             admin_root.title("Admin Panel")
             admin_root.protocol("WM_DELETE_WINDOW", update_ui)
@@ -189,15 +194,12 @@ def update_labels():
     changeLabel.config(text=f"Rückgeld: {change:.2f}€")
 
 def log_transaction(item, quantity, price, total):
-    global transaction_id
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    transaction_data = [transaction_id, item, quantity, price, total, timestamp]
+    transaction_data = {'item': item, 'quantity': quantity, 'price': price, 'total': total, 'timestamp': timestamp}
 
-    with open(os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'transactions.csv'), mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(transaction_data)
-
-    transaction_id += 1
+    Transaction.Save(transaction_data)
+   
+    
 
 def enter_money(value):
     global guthabenLabel, guthaben, totalEntered
