@@ -7,6 +7,7 @@ from datetime import datetime
 from Backend.DataAccessors.Stock import Stock
 from Backend.CSVHandler import CSVHandler
 from UI.admin_panel import AdminPanel
+from Backend.DataAccessors.Transaction import Transaction
 
 # Globale Variableninitialisierung
 global enteredSum, sumToEnter, change, transaction_id, guthaben
@@ -21,6 +22,7 @@ transaction_id = 1
 guthabenLabel = None
 changeLabel = None
 
+
 def create_window(root, price_calculator):
     """
     Erstellt das Hauptfenster der Anwendung, in dem die Getränke angezeigt werden.
@@ -32,7 +34,8 @@ def create_window(root, price_calculator):
     global guthabenLabel, changeLabel
 
     csv_handler = CSVHandler()
-    stock_file_path = os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'stock.csv')
+    stock_file_path = os.path.join(os.path.dirname(
+        __file__), '..', 'Backend', 'CSV', 'stock.csv')
     stock_manager = Stock(csv_handler, stock_file_path)
 
     def update_ui():
@@ -62,12 +65,14 @@ def create_window(root, price_calculator):
             row=0, column=1, padx=10)
 
         # Erstellt Guthaben-Label
-        guthabenLabel = Label(root, text=f"Guthaben: {guthaben:.2f}€", font=("Arial", 20))
+        guthabenLabel = Label(root, text=f"Guthaben: {
+                              guthaben:.2f}€", font=("Arial", 20))
         guthabenLabel.grid(row=1, column=1, pady=10)
 
         # Erstellt Rahmen für Geldknöpfe
         moneyFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken")
-        moneyFrame.grid(row=2, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+        moneyFrame.grid(row=2, column=0, columnspan=3,
+                        padx=20, pady=10, sticky="ew")
         moneyFrame.grid_columnconfigure(0, weight=1)
         moneyFrame.grid_columnconfigure(1, weight=1)
         moneyFrame.grid_columnconfigure(2, weight=1)
@@ -85,8 +90,10 @@ def create_window(root, price_calculator):
                    command=lambda value=bill: enter_money(value), cursor="hand2").grid(row=1, column=i, sticky="ew")
 
         # Rahmen für Getränkeknöpfe
-        drinksFrame = tk.Frame(root, bg="white", borderwidth=2, relief="sunken")
-        drinksFrame.grid(row=3, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+        drinksFrame = tk.Frame(
+            root, bg="white", borderwidth=2, relief="sunken")
+        drinksFrame.grid(row=3, column=0, columnspan=3,
+                         padx=20, pady=10, sticky="ew")
         drinksFrame.grid_columnconfigure(0, weight=1)
         drinksFrame.grid_columnconfigure(1, weight=1)
         drinksFrame.grid_columnconfigure(2, weight=1)
@@ -109,7 +116,8 @@ def create_window(root, price_calculator):
                 button = Button(drinksFrame, text=buttonText, command=lambda drink=drink,
                                 price=price: add_drink(drink, price, stock_manager, update_ui), cursor="hand2")
             else:
-                button = Button(drinksFrame, text=f"{drink} - SOLD OUT", state=DISABLED)
+                button = Button(drinksFrame, text=f"{
+                                drink} - SOLD OUT", state=DISABLED)
 
             button.grid(column=buttonColumn, row=buttonRow, sticky="ew")
 
@@ -122,7 +130,8 @@ def create_window(root, price_calculator):
             row=4, column=2, pady=10, padx=10, sticky="ew")
 
         # Rückgeld-Label
-        changeLabel = Label(root, text=f"Rückgeld: {change:.2f}€", font=("Arial", 16))
+        changeLabel = Label(root, text=f"Rückgeld: {
+                            change:.2f}€", font=("Arial", 16))
         changeLabel.grid(row=5, column=0, columnspan=3, pady=10, sticky="ew")
 
         # Minimale Fenstergröße
@@ -136,7 +145,8 @@ def create_window(root, price_calculator):
         """
         Öffnet das Admin-Panel, nachdem das korrekte Passwort eingegeben wurde.
         """
-        password = simpledialog.askstring("Enter Password", "Please enter the admin password:", show='*')
+        password = simpledialog.askstring(
+            "Enter Password", "Please enter the admin password:", show='*')
         if password == "123":
             admin_root = tk.Toplevel()
             admin_root.title("Admin Panel")
@@ -147,6 +157,7 @@ def create_window(root, price_calculator):
             messagebox.showerror("Error", "Incorrect password!")
 
     build_ui()
+
 
 def add_drink(drink, price, stock_manager, update_ui_callback):
     """
@@ -166,7 +177,9 @@ def add_drink(drink, price, stock_manager, update_ui_callback):
         log_transaction(drink, 1, price, price)
         update_ui_callback()
     else:
-        messagebox.showerror("Fehler", f"Nicht genug Guthaben. Preis: {price:.2f}€, Guthaben: {guthaben:.2f}€")
+        messagebox.showerror("Fehler", f"Nicht genug Guthaben. Preis: {
+                             price:.2f}€, Guthaben: {guthaben:.2f}€")
+
 
 def complete_transaction():
     """
@@ -176,8 +189,10 @@ def complete_transaction():
     change = guthaben
     guthaben = 0
     update_labels()
-    messagebox.showinfo("Transaktion abgeschlossen", f"Rückgeld: {change:.2f}€")
+    messagebox.showinfo("Transaktion abgeschlossen",
+                        f"Rückgeld: {change:.2f}€")
     change = 0  # Setzt das Wechselgeld nach der Anzeige der Nachricht zurück
+
 
 def cancel_transaction():
     """
@@ -191,6 +206,7 @@ def cancel_transaction():
     messagebox.showinfo("Transaktion abgebrochen", f"Rückgeld: {change:.2f}€")
     change = 0  # Setzt das Wechselgeld nach der Anzeige der Nachricht zurück
 
+
 def update_labels():
     """
     Aktualisiert die Labels für das aktuelle Guthaben und das Rückgeld.
@@ -198,6 +214,7 @@ def update_labels():
     global guthabenLabel, changeLabel
     guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")
     changeLabel.config(text=f"Rückgeld: {change:.2f}€")
+
 
 def log_transaction(item, quantity, price, total):
     """
@@ -210,13 +227,17 @@ def log_transaction(item, quantity, price, total):
     """
     global transaction_id
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    transaction_data = [transaction_id, item, quantity, price, total, timestamp]
+    transaction_data = {"transaction_id": transaction_id,
+                        "item": item,
+                        "quantity": quantity,
+                        "price": price,
+                        "total": total,
+                        "timestamp": timestamp}
 
-    with open(os.path.join(os.path.dirname(__file__), '..', 'Backend', 'CSV', 'transactions.csv'), mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(transaction_data)
+    Transaction.Save(transaction_data)
 
     transaction_id += 1
+
 
 def enter_money(value):
     """
@@ -227,6 +248,7 @@ def enter_money(value):
     global guthabenLabel, guthaben
     guthaben += value
     guthabenLabel.config(text=f"Guthaben: {guthaben:.2f}€")
+
 
 def reset_money():
     """
