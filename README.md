@@ -36,7 +36,7 @@ Dieses Projekt entwickelt eine Software zur Steuerung eines **Getränkeautomaten
    </code>
    </pre>
 
-### 🛠 Verwendung
+### Verwendung
 
 Starte das Programm:
 
