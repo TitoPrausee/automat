@@ -44,27 +44,24 @@ class Transaction:
     @staticmethod
     def get_next_transaction_id():
         """
-        Liest die CSV-Datei und gibt die nächste verfügbare transaction_id zurück.
+        Liest die letzte Zeile der CSV-Datei und gibt die nächste verfügbare transaction_id zurück.
         Falls keine Transaktionen vorhanden sind, wird die transaction_id auf 1 gesetzt.
 
         :return: Die nächste transaction_id (int)
         """
-        # Standardmäßige transaction_id, falls keine Daten vorhanden sind
         next_transaction_id = 1
 
-        # Überprüfen, ob die CSV-Datei existiert und Daten enthält
+        # Überprüfen, ob die CSV-Datei existiert und nicht leer ist
         if os.path.exists(Transaction.csvPath):
             with open(Transaction.csvPath, 'r') as csvFile:
-                reader = csv.DictReader(csvFile)
-                # Durchlaufen der Zeilen, um die höchste transaction_id zu finden
-                for row in reader:
+                reader = list(csv.DictReader(csvFile))
+                if reader:
+                    # Letzte Zeile nehmen und transaction_id um 1 erhöhen
+                    last_transaction = reader[-1]
                     try:
-                        # Überprüfen, ob 'transaction_id' in der Zeile existiert
-                        current_id = int(row['transaction_id'])
-                        next_transaction_id = max(
-                            next_transaction_id, current_id + 1)
+                        next_transaction_id = int(
+                            last_transaction['transaction_id']) + 1
                     except (ValueError, KeyError):
-                        # Bei ungültigen oder fehlenden Werten einfach überspringen
-                        continue
+                        pass  # Falls die transaction_id ungültig ist, behalten wir den Standardwert 1
 
         return next_transaction_id
